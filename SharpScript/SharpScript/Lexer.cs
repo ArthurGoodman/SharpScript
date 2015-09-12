@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SharpScript {
     public class Lexer : ILexer {
         private string source;
-        private int pos;
+        private int pos, line, column;
 
         private string[] keywords = new[] {
             "if",
@@ -42,6 +42,7 @@ namespace SharpScript {
         public List<Token> Lex(string source) {
             this.source = source;
             pos = 0;
+            line = column = 1;
 
             List<Token> tokens = new List<Token>();
 
@@ -63,9 +64,46 @@ namespace SharpScript {
 
             if (pos == source.Length)
                 token.Id = Token.TokenId.End;
-            else if (char.IsLetter(source[pos]) || source[pos] == '_') {
-                while (pos < source.Length && (char.IsLetter(source[pos]) || source[pos] == '_'))
-                    token.Text += source[pos++];
+            else if (char.IsDigit(At(pos))) {
+                while (char.IsDigit(At(pos)))
+                    token.Text += At(pos++);
+
+                if (At(pos) == '.') {
+                    do
+                        token.Text += At(pos++);
+                    while (char.IsDigit(At(pos)));
+
+                    token.Id = Token.TokenId.Float;
+                } else
+                    token.Id = Token.TokenId.Integer;
+
+                if (char.ToLower(At(pos)) == 'e') {
+                    token.Text += At(pos++);
+
+                    if (At(pos) == '+' || At(pos) == '-')
+                        token.Text += At(pos++);
+
+                    while (char.IsDigit(At(pos)))
+                        token.Text += At(pos++);
+
+                    token.Id = Token.TokenId.Float;
+                }
+
+                while ((char.IsLetter(At(pos)) || At(pos) == '_'))
+                    token.Text += At(pos++);
+
+                if (token.Id == Token.TokenId.Float) {
+                    double result;
+                    if (!double.TryParse(token.Text, out result))
+                        Error("invalid float constant");
+                } else {
+                    int result;
+                    if (!int.TryParse(token.Text, out result))
+                        Error("invalid integer constant");
+                }
+            } else if (char.IsLetter(At(pos)) || At(pos) == '_') {
+                while ((char.IsLetter(At(pos)) || At(pos) == '_'))
+                    token.Text += At(pos++);
 
                 if (Array.Exists(keywords, (string s) => s == token.Text))
                     token.Id = Token.TokenId.Keyword;
@@ -73,15 +111,23 @@ namespace SharpScript {
                     token.Id = Token.TokenId.Identifier;
             } else {
                 token.Id = Token.TokenId.Unknown;
-                token.Text += source[pos++];
+                token.Text += At(pos++);
             }
 
             return token;
         }
 
         private void SkipSpaces() {
-            while (pos < source.Length && char.IsWhiteSpace(source[pos]))
+            while (char.IsWhiteSpace(At(pos)))
                 pos++;
+        }
+
+        private char At(int pos) {
+            return pos < source.Length ? source[pos] : '\0';
+        }
+
+        private void Error(string message, int delta = 0) {
+            throw new LexicalErrorException(message, new Position());
         }
     }
 }

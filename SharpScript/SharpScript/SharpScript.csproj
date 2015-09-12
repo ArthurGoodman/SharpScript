@@ -41,7 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LexicalErrorException.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="ErrorException.cs" />
     <Compile Include="IEngine.cs" />
     <Compile Include="ILexer.cs" />
     <Compile Include="Lexer.cs" />
