@@ -6,47 +6,38 @@ namespace SharpScript {
         private string source;
         private int pos;
 
-        private string[] keywords;
-        private string[] operators;
+        private string[] keywords = new[] {
+            "if",
+            "else",
+            "while",
+            "for",
+            "do",
+            "true",
+            "false"
+        };
 
-        public Lexer() {
-            keywords = new[] {
-                "if",
-                "else",
-                "while",
-                "for",
-                "do",
-                "forever",
-                "break",
-                "continue",
-                "true",
-                "false"
-            };
-
-            operators = new[] {
-                "+",
-                "-",
-                "*",
-                "/",
-                "**",
-                "&&",
-                "||",
-                "<",
-                ">",
-                "<=",
-                ">=",
-                "==",
-                "!=",
-                "!",
-                "=",
-                "(",
-                ")",
-                "{",
-                "}",
-                ";"
-            };
-
-        }
+        private string[] operators = new[] {
+            "+",
+            "-",
+            "*",
+            "/",
+            "**",
+            "&&",
+            "||",
+            "<",
+            ">",
+            "<=",
+            ">=",
+            "==",
+            "!=",
+            "!",
+            "=",
+            "(",
+            ")",
+            "{",
+            "}",
+            ";"
+        };
 
         public List<Token> Lex(string source) {
             this.source = source;

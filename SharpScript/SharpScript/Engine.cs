@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace SharpScript {
     public class Engine : IEngine {
@@ -13,7 +14,11 @@ namespace SharpScript {
         }
 
         public void Run(string source) {
-            lexer.Lex(source);
+            try {
+                lexer.Lex(source);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public void RunFile(string fileName) {
