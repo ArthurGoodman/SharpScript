@@ -2,9 +2,13 @@
 
 namespace SharpScript {
     public class Engine : IEngine {
+        public static IEngine Instance = new Engine();
+
         private ILexer lexer;
 
         public Engine() {
+            Instance = this;
+
             lexer = new Lexer();
         }
 

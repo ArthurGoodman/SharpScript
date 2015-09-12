@@ -22,9 +22,5 @@
             Text = "";
             Id = TokenId.None;
         }
-
-        public string Inspect() {
-            return string.Format("{{ Id = \"{0}\", Text = \"{1}\" }}", Id, Text);
-        }
     }
 }

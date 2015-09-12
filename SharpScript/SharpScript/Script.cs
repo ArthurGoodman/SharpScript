@@ -1,12 +1,10 @@
 ﻿using System;
 
 namespace SharpScript {
-    public class Script {
-        private static IEngine engine = new Engine();
-
+    public static class Script {
         public static void RunFile(string source) {
             try {
-                engine.RunFile(source);
+                Engine.Instance.RunFile(source);
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
