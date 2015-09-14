@@ -1,22 +1,24 @@
 ﻿namespace SharpScript.StateMachine {
     public class StateMachine : IStateMachine {
-        public int[] S { get; set; }
-        public int[] F { get; set; }
-        public Transition[][] Q { get; set; }
+        public State[] Q { get; set; }
 
         public StateMachine() {
         }
 
-        public IStateMachine Reverse() {
+        public StateMachine Reverse() {
             return this;
         }
 
-        public IStateMachine Determinize() {
+        public StateMachine Determinize() {
             return this;
         }
 
-        public IStateMachine Minimize() {
+        public StateMachine Minimize() {
             return this;
+        }
+
+        public StateMachineMatch Match(string str) {
+            throw new System.NotImplementedException();
         }
     }
 }
