@@ -1,6 +1,8 @@
-﻿namespace SharpScript.StateMachine {
+﻿using System.Collections.Generic;
+
+namespace SharpScript.StateMachine {
     public class StateMachine : IStateMachine {
-        public State[] Q { get; set; }
+        public HashSet<State> Q { get; set; }
 
         public StateMachine() {
         }
@@ -18,7 +20,7 @@
         }
 
         public StateMachineMatch Match(string str) {
-            throw new System.NotImplementedException();
+            return null;
         }
     }
 }
