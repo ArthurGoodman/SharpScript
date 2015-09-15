@@ -41,7 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StateMachine\IStateMachine.cs" />
+    <Compile Include="FiniteAutomata\IStateMachine.cs" />
     <Compile Include="LexicalErrorException.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Engine.cs" />
@@ -53,10 +53,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Script.cs" />
-    <Compile Include="StateMachine\State.cs" />
-    <Compile Include="StateMachine\StateMachine.cs" />
-    <Compile Include="StateMachine\StateMachineMatch.cs" />
-    <Compile Include="StateMachine\Transition.cs" />
+    <Compile Include="FiniteAutomata\State.cs" />
+    <Compile Include="FiniteAutomata\StateMachine.cs" />
+    <Compile Include="FiniteAutomata\StateMachineMatch.cs" />
+    <Compile Include="FiniteAutomata\Transition.cs" />
     <Compile Include="Token.cs" />
   </ItemGroup>
   <ItemGroup>

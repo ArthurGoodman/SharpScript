@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace SharpScript.StateMachine {
+namespace SharpScript.FiniteAutomata {
     public class StateMachine : IStateMachine {
-        public HashSet<State> Q { get; set; }
+        public ISet<State> Q { get; set; }
 
-        public StateMachine() {
+        public StateMachine(ISet<State> q) {
+            Q = q;
         }
 
         public StateMachine Reverse() {
@@ -20,7 +21,7 @@ namespace SharpScript.StateMachine {
         }
 
         public StateMachineMatch Match(string str) {
-            return null;
+            return new StateMachineMatch();
         }
     }
 }
