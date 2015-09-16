@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FiniteAutomata\IStateMachine.cs" />
+    <Compile Include="FiniteAutomata\MultiState.cs" />
     <Compile Include="LexicalErrorException.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Engine.cs" />

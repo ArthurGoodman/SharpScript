@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SharpScript.FiniteAutomata {
     public class State {
@@ -13,7 +14,20 @@ namespace SharpScript.FiniteAutomata {
         public bool Start { get; set; }
         public bool Final { get; set; }
 
-        private static int idCounter = 0;
+        public HashSet<char> Alphabet {
+            get {
+                HashSet<char> alphabet = new HashSet<char>();
+
+                foreach (Transition transition in Transitions)
+                    if (transition.Symbol != null)
+                        alphabet.Add((char)transition.Symbol);
+
+                return alphabet;
+            }
+        }
+
+        private static int idCounter;
+
         public static HashSet<State> States { get; private set; }
 
         public static void Initialize() {
@@ -32,8 +46,44 @@ namespace SharpScript.FiniteAutomata {
             Final = false;
         }
 
-        public void Connect(char? symbol, State state, int? label) {
+        public void ComputeEpsilonClosure(HashSet<State> closure) {
+            closure.Add(this);
+
+            if (Visited)
+                return;
+
+            Visited = true;
+
+            foreach (Transition transition in Transitions)
+                if (transition.Symbol == null)
+                    transition.State.ComputeEpsilonClosure(closure);
+        }
+
+        public void Connect(char? symbol, State state, int? label = null) {
             Transitions.Add(new Transition(symbol, state, label));
+        }
+
+        public HashSet<State> Transit(char? symbol, ref int? label) {
+            HashSet<State> result = new HashSet<State>();
+
+            HashSet<int> labels = new HashSet<int>();
+
+            foreach (Transition transition in Transitions)
+                if (transition.Symbol == symbol) {
+                    if (transition.Label != null)
+                        labels.Add((int)transition.Label);
+
+                    result.Add(transition.State);
+                }
+
+            if (labels.Count == 1) {
+                HashSet<int>.Enumerator en = labels.GetEnumerator();
+                en.MoveNext();
+                label = en.Current;
+            } else
+                label = null;
+
+            return result;
         }
 
         public string Inspect() {

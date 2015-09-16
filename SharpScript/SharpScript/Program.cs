@@ -9,25 +9,43 @@ namespace SharpScript {
 
             State.Initialize();
 
-            State q0 = new State();
-            q0.Start = true;
-            State q1 = new State();
-            State q2 = new State();
-            q2.Final = true;
-            State q3 = new State();
-            State q4 = new State();
-            q4.Final = true;
+            State s = new State();
+            s.Start = true;
+            State f = new State();
+            f.Final = true;
 
-            q0.Connect(null, q1, null);
-            q0.Connect(null, q3, null);
-            q1.Connect('a', q2, 0);
-            q3.Connect('b', q4, 1);
+            State _a1 = new State();
+            State a1 = new State();
+            State ab = new State();
+            State abc = new State();
+
+            s.Connect(null, _a1);
+            
+            _a1.Connect('a', a1, 0);
+            a1.Connect('b', ab, 0);
+            ab.Connect('c', abc, 0);
+            
+            abc.Connect(null, f);
+
+            State _a2 = new State();
+            State a2 = new State();
+            State ad = new State();
+            State adc = new State();
+
+            s.Connect(null, _a2);
+
+            _a2.Connect('a', a2, 1);
+            a2.Connect('d', ad, 1);
+            ad.Connect('c', adc, 1);
+
+            adc.Connect(null, f);
 
             StateMachine sm = new StateMachine(State.States);
             Console.WriteLine(sm);
 
-            StateMachine reversed = sm.Reverse();
-            Console.WriteLine(reversed);
+            StateMachine minimized = sm.Minimize();
+            minimized.Reindex();
+            Console.WriteLine(minimized);
         }
     }
 }
