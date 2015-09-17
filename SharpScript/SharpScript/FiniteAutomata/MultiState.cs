@@ -5,6 +5,12 @@ namespace SharpScript.FiniteAutomata {
         public HashSet<State> States { get; set; }
         public State State { get; set; }
 
+        public bool Empty {
+            get {
+                return States.Count == 0;
+            }
+        }
+
         public HashSet<char> Alphabet {
             get {
                 HashSet<char> alphabet = new HashSet<char>();

@@ -47,8 +47,8 @@ namespace SharpScript.FiniteAutomata {
             MultiState.Initialize();
             State.Initialize();
 
-            LinkedList<MultiState> ms = new LinkedList<MultiState>();
-            HashSet<State> ds = new HashSet<State>();
+            LinkedList<MultiState> multiStates = new LinkedList<MultiState>();
+            HashSet<State> states = new HashSet<State>();
 
             HashSet<State> startStates = new HashSet<State>();
 
@@ -56,34 +56,34 @@ namespace SharpScript.FiniteAutomata {
                 if (state.Start)
                     startStates.Add(state);
 
-            MultiState q0 = MultiState.Create(startStates).GetEpsilonClosure();
-            q0.State.Start = true;
-            ms.AddLast(q0);
+            MultiState start = MultiState.Create(startStates).GetEpsilonClosure();
+            start.State.Start = true;
+            multiStates.AddLast(start);
 
-            while (ms.Count != 0) {
-                MultiState s = ms.First.Value;
-                ms.RemoveFirst();
+            while (multiStates.Count != 0) {
+                MultiState multiState = multiStates.First.Value;
+                multiStates.RemoveFirst();
 
-                if (ds.Contains(s.State))
+                if (states.Contains(multiState.State))
                     continue;
 
-                ds.Add(s.State);
+                states.Add(multiState.State);
 
-                foreach (char symbol in s.Alphabet) {
+                foreach (char symbol in multiState.Alphabet) {
                     int? label = null;
 
-                    MultiState newS = s.Transit(symbol, ref label).GetEpsilonClosure();
+                    MultiState newState = multiState.Transit(symbol, ref label).GetEpsilonClosure();
 
-                    if (newS.States.Count == 0)
+                    if (newState.Empty)
                         continue;
 
-                    ms.AddLast(newS);
+                    multiStates.AddLast(newState);
 
-                    s.State.Connect(symbol, newS.State, label);
+                    multiState.State.Connect(symbol, newState.State, label);
                 }
             }
 
-            return new StateMachine(ds);
+            return new StateMachine(states);
         }
 
         public StateMachine Minimize() {
