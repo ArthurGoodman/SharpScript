@@ -1,4 +1,4 @@
-﻿namespace SharpScript.FiniteAutomata {
+﻿namespace FiniteAutomata {
     public class Transition {
         public char? Symbol { get; set; }
         public State State { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace SharpScript.FiniteAutomata {
+﻿namespace FiniteAutomata {
     public interface IStateMachine {
         StateMachineMatch Match(string str);
     }

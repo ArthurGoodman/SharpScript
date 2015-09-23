@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SharpScript.FiniteAutomata {
+namespace FiniteAutomata {
     public class State {
         public List<Transition> Transitions { get; private set; }
 

@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AB25B3F2-79A3-44B5-980F-6488F3F2951F}</ProjectGuid>
+    <ProjectGuid>{CF92EF91-72A4-4955-B670-F161B025641E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpScript</RootNamespace>
-    <AssemblyName>SharpScript</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>FiniteAutomata</RootNamespace>
+    <AssemblyName>FiniteAutomata</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,22 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LexicalErrorException.cs" />
-    <Compile Include="Position.cs" />
-    <Compile Include="Engine.cs" />
-    <Compile Include="ErrorException.cs" />
-    <Compile Include="IEngine.cs" />
-    <Compile Include="ILexer.cs" />
-    <Compile Include="Lexer.cs" />
-    <Compile Include="ObjectDumper.cs" />
+    <Compile Include="IStateMachine.cs" />
+    <Compile Include="MultiState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Script.cs" />
-    <Compile Include="Token.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="script.sh" />
+    <Compile Include="State.cs" />
+    <Compile Include="StateMachine.cs" />
+    <Compile Include="StateMachineMatch.cs" />
+    <Compile Include="Transition.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SharpScript.FiniteAutomata {
+namespace FiniteAutomata {
     public class StateMachine : IStateMachine {
         public HashSet<State> States { get; set; }
 
