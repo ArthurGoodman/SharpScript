@@ -17,6 +17,7 @@
 
         public string Text { get; set; }
         public TokenId Id { get; set; }
+        public Position Position { get; set; }
 
         public Token() {
             Text = "";

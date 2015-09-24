@@ -8,7 +8,7 @@ namespace SharpScript {
 
         private ILexer lexer;
 
-        private Stack<string> sources = new Stack<string>();
+        private Stack<Source> sources = new Stack<Source>();
         private Stack<string> fileNames = new Stack<string>();
 
         private string FileName {
@@ -17,7 +17,7 @@ namespace SharpScript {
             }
         }
 
-        private string Source {
+        private Source Source {
             get {
                 return sources.Peek();
             }
@@ -30,15 +30,14 @@ namespace SharpScript {
         }
 
         public void Run(string source) {
-            sources.Push(source);
+            sources.Push(new Source(ExpandTabs(source)));
 
             try {
                 lexer.Lex(source);
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
-                if (e.Position.Valid) {
-                    // quote
-                }
+                //if (e.Position.Valid)
+                //    Console.WriteLine(Source.Quote(e.Position));
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
@@ -47,9 +46,21 @@ namespace SharpScript {
         }
 
         public void RunFile(string fileName) {
-            fileNames.Push(fileName);
+            fileNames.Push(Path.GetFullPath(fileName));
             Run(File.ReadAllText(fileName));
             fileNames.Pop();
+        }
+
+        private static string ExpandTabs(string str) {
+            const int tabLength = 4;
+
+            string[] text = str.Split('\t');
+            string result = "";
+
+            foreach (string s in text)
+                result += s + new string(' ', tabLength - s.Length % tabLength);
+
+            return result;
         }
     }
 }

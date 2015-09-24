@@ -5,6 +5,7 @@ namespace SharpScript {
     public class Lexer : ILexer {
         private string source;
         private int pos, line, column;
+        private Token token;
 
         private string[] keywords = new[] {
             "if",
@@ -46,10 +47,8 @@ namespace SharpScript {
 
             List<Token> tokens = new List<Token>();
 
-            Token token;
-
             do {
-                token = Scan();
+                Scan();
                 Console.WriteLine(token.Inspect());
                 tokens.Add(token);
             } while (token.Id != Token.TokenId.End);
@@ -57,12 +56,14 @@ namespace SharpScript {
             return tokens;
         }
 
-        private Token Scan() {
+        private void Scan() {
             SkipSpaces();
 
-            Token token = new Token();
+            token = new Token();
 
-            if (pos == source.Length)
+            token.Position = new Position(pos, line, column);
+
+            if (At(pos) == '\0')
                 token.Id = Token.TokenId.End;
             else if (char.IsDigit(At(pos))) {
                 while (char.IsDigit(At(pos)))
@@ -114,7 +115,7 @@ namespace SharpScript {
                 token.Text += At(pos++);
             }
 
-            return token;
+            column += token.Text.Length;
         }
 
         private void SkipSpaces() {
@@ -127,7 +128,7 @@ namespace SharpScript {
         }
 
         private void Error(string message, int delta = 0) {
-            throw new LexicalErrorException(message, new Position());
+            throw new LexicalErrorException(message, token.Position.Shifted(delta));
         }
     }
 }
