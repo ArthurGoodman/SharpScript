@@ -36,8 +36,8 @@ namespace SharpScript {
                 lexer.Lex(source);
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
-                //if (e.Position.Valid)
-                //    Console.WriteLine(Source.Quote(e.Position));
+                if (e.Position.Valid)
+                    Console.WriteLine(Source.Quote(e.Position));
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
             }

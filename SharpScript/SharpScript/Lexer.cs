@@ -59,6 +59,13 @@ namespace SharpScript {
         private void Scan() {
             SkipSpaces();
 
+            while (At(pos) == '/' && At(pos + 1) == '/') {
+                while (At(pos) != '\0' && At(pos) != '\n')
+                    pos++;
+
+                SkipSpaces();
+            }
+
             token = new Token();
 
             token.Position = new Position(pos, line, column);
@@ -119,8 +126,15 @@ namespace SharpScript {
         }
 
         private void SkipSpaces() {
-            while (char.IsWhiteSpace(At(pos)))
+            while (char.IsWhiteSpace(At(pos))) {
                 pos++;
+                column++;
+                
+                if (At(pos - 1) == '\n') {
+                    line++;
+                    column = 1;
+                }
+            }
         }
 
         private char At(int pos) {
