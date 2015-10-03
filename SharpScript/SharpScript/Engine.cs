@@ -7,6 +7,7 @@ namespace SharpScript {
         public static IEngine Instance = new Engine();
 
         private ILexer lexer;
+        private IParser parser;
 
         private Stack<Source> sources = new Stack<Source>();
         private Stack<string> fileNames = new Stack<string>();
@@ -27,13 +28,17 @@ namespace SharpScript {
             Instance = this;
 
             lexer = new Lexer();
+            parser = new Parser();
         }
 
         public void Run(string source) {
-            sources.Push(new Source(ExpandTabs(source)));
+            source = ExpandTabs(source);
+
+            sources.Push(new Source(source));
 
             try {
-                lexer.Lex(source);
+                Context root = new Context();
+                Console.WriteLine(parser.Parse(lexer.Lex(source)).Eval(root) ?? "null");
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
                 if (e.Position.Valid)

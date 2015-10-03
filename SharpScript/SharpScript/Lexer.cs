@@ -49,9 +49,9 @@ namespace SharpScript {
 
             do {
                 Scan();
-                Console.WriteLine(token.Inspect());
+                //Console.WriteLine(token.Inspect());
                 tokens.Add(token);
-            } while (token.Id != Token.TokenId.End);
+            } while (token.Id != Token.ID.End);
 
             return tokens;
         }
@@ -71,7 +71,7 @@ namespace SharpScript {
             token.Position = new Position(pos, line, column);
 
             if (At(pos) == '\0')
-                token.Id = Token.TokenId.End;
+                token.Id = Token.ID.End;
             else if (char.IsDigit(At(pos))) {
                 while (char.IsDigit(At(pos)))
                     token.Text += At(pos++);
@@ -81,9 +81,9 @@ namespace SharpScript {
                         token.Text += At(pos++);
                     while (char.IsDigit(At(pos)));
 
-                    token.Id = Token.TokenId.Float;
+                    token.Id = Token.ID.Float;
                 } else
-                    token.Id = Token.TokenId.Integer;
+                    token.Id = Token.ID.Integer;
 
                 if (char.ToLower(At(pos)) == 'e') {
                     token.Text += At(pos++);
@@ -94,13 +94,13 @@ namespace SharpScript {
                     while (char.IsDigit(At(pos)))
                         token.Text += At(pos++);
 
-                    token.Id = Token.TokenId.Float;
+                    token.Id = Token.ID.Float;
                 }
 
                 while ((char.IsLetter(At(pos)) || At(pos) == '_'))
                     token.Text += At(pos++);
 
-                if (token.Id == Token.TokenId.Float) {
+                if (token.Id == Token.ID.Float) {
                     double result;
                     if (!double.TryParse(token.Text, out result))
                         Error("invalid float constant");
@@ -114,11 +114,11 @@ namespace SharpScript {
                     token.Text += At(pos++);
 
                 if (Array.Exists(keywords, (string s) => s == token.Text))
-                    token.Id = Token.TokenId.Keyword;
+                    token.Id = Token.ID.Keyword;
                 else
-                    token.Id = Token.TokenId.Identifier;
+                    token.Id = Token.ID.Identifier;
             } else {
-                token.Id = Token.TokenId.Unknown;
+                token.Id = Token.ID.Unknown;
                 token.Text += At(pos++);
             }
 
@@ -129,7 +129,7 @@ namespace SharpScript {
             while (char.IsWhiteSpace(At(pos))) {
                 pos++;
                 column++;
-                
+
                 if (At(pos - 1) == '\n') {
                     line++;
                     column = 1;

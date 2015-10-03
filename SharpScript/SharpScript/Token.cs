@@ -1,6 +1,6 @@
 ﻿namespace SharpScript {
     public class Token {
-        public enum TokenId {
+        public enum ID {
             None = -1,
 
             Integer,
@@ -16,12 +16,12 @@
         }
 
         public string Text { get; set; }
-        public TokenId Id { get; set; }
+        public ID Id { get; set; }
         public Position Position { get; set; }
 
         public Token() {
             Text = "";
-            Id = TokenId.None;
+            Id = ID.None;
         }
     }
 }

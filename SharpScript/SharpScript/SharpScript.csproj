@@ -41,7 +41,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Context.cs" />
+    <Compile Include="EmptyNode.cs" />
+    <Compile Include="IParser.cs" />
     <Compile Include="LexicalErrorException.cs" />
+    <Compile Include="INode.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="ErrorException.cs" />
@@ -54,6 +60,7 @@
     <Compile Include="Script.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="StringExtension.cs" />
+    <Compile Include="SyntaxErrorException.cs" />
     <Compile Include="Token.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,8 @@
 
 namespace SharpScript {
     public class Source {
+        private static int maxQuoteLength = 150;
+
         private string source;
 
         public Source(string source) {
@@ -9,8 +11,6 @@ namespace SharpScript {
         }
 
         public string Quote(Position position) {
-            const int maxQuoteLength = 150;
-
             int start = source.LastIndexOf('\n', position.Offset) + 1;
             int end = source.IndexOf('\n', position.Offset);
 
