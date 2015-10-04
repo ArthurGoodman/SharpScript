@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 
 namespace SharpScript {
     public class Engine : IEngine {
@@ -37,8 +38,7 @@ namespace SharpScript {
             sources.Push(new Source(source));
 
             try {
-                Context root = new Context();
-                Console.WriteLine(parser.Parse(lexer.Lex(source)).Eval(root) ?? "null");
+                Console.WriteLine(Expression.Lambda(parser.Parse(lexer.Lex(source))).Compile().DynamicInvoke());
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
                 if (e.Position.Valid)

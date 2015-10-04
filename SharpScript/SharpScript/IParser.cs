@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace SharpScript {
     public interface IParser {
-        INode Parse(List<Token> tokens);
+        Expression Parse(List<Token> tokens);
     }
 }

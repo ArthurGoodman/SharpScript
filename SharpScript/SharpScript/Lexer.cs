@@ -14,7 +14,8 @@ namespace SharpScript {
             "for",
             "do",
             "true",
-            "false"
+            "false",
+            "null"
         };
 
         private string[] operators = new[] {
@@ -37,7 +38,9 @@ namespace SharpScript {
             ")",
             "{",
             "}",
-            ";"
+            ";",
+            "++",
+            "--"
         };
 
         public List<Token> Lex(string source) {
@@ -118,8 +121,23 @@ namespace SharpScript {
                 else
                     token.Id = Token.ID.Identifier;
             } else {
-                token.Id = Token.ID.Unknown;
-                token.Text += At(pos++);
+                int i = 0;
+
+                while(i != operators.Length)
+                    for(i = 0; i != operators.Length; i++)
+                        if(operators[i].SubstringWrapper(0, token.Text.Length + 1) == token.Text + At(pos)) {
+                            token.Text += At(pos++);
+                            break;
+                        }
+
+                if(token.Text != "" && (i = Array.IndexOf(operators, token.Text)) != -1)
+                    token.Id = Token.ID.Keyword;
+                else {
+                    if (token.Text == "")
+                        token.Text += At(pos++);
+
+                    token.Id = Token.ID.Unknown;
+                }
             }
 
             column += token.Text.Length;

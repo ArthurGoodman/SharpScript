@@ -1,4 +1,4 @@
 ﻿namespace SharpScript {
-    public class Context {
+    public class Class {
     }
 }

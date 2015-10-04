@@ -10,7 +10,6 @@
             Keyword,
             Operator,
             Identifier,
-            Symbol,
             End,
             Unknown
         }

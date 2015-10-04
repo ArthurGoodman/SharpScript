@@ -1,106 +1,219 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace SharpScript {
     public class Parser : IParser {
         private List<Token> tokens;
         private List<Token>.Enumerator token;
 
-        public INode Parse(List<Token> tokens) {
+        public Expression Parse(List<Token> tokens) {
             this.tokens = tokens;
             token = tokens.GetEnumerator();
 
             GetToken();
 
-            Position p = token.Current.Position;
+            //Position p = token.Current.Position;
 
-            List<INode> nodes = new List<INode>();
+            List<Expression> nodes = new List<Expression>();
 
             while (!Check(Token.ID.End))
                 nodes.Add(Oper());
 
-            INode node = new EmptyNode();
-            node.Position = p;
+            Expression e = nodes.Count == 0 ? Expression.Empty() : (Expression)Expression.Block(nodes);
+            //e.Position = p;
 
-            return node;
+            return e;
         }
 
-        private INode Oper() {
-            INode node = Expr();
+        private Expression Oper() {
+            Expression e = Expr();
 
             Accept(";");
 
-            return node;
+            return e;
         }
 
-        private INode Expr() {
-            INode node = LogicOr();
+        private Expression Expr() {
+            Expression e = LogicOr();
 
-            return node;
+            return e;
         }
 
-        private INode LogicOr() {
-            INode node = LogicAnd();
+        private Expression LogicOr() {
+            Expression e = LogicAnd();
 
-            return node;
+            while (true) {
+                if (Accept("||"))
+                    e = Expression.Or(e, LogicAnd());
+                else
+                    break;
+            }
+
+            return e;
         }
 
-        private INode LogicAnd() {
-            INode node = Equality();
+        private Expression LogicAnd() {
+            Expression e = Equality();
 
-            return node;
+            while (true) {
+                if (Accept("&&"))
+                    e = Expression.And(e, Equality());
+                else
+                    break;
+            }
+
+            return e;
         }
 
-        private INode Equality() {
-            INode node = Relation();
+        private Expression Equality() {
+            Expression e = Relation();
 
-            return node;
+            while (true) {
+                if (Accept("=="))
+                    e = Expression.Equal(e, Relation());
+                else if (Accept("!="))
+                    e = Expression.NotEqual(e, Relation());
+                break;
+            }
+
+            return e;
         }
 
-        private INode Relation() {
-            INode node = AddSub();
+        private Expression Relation() {
+            Expression e = AddSub();
 
-            return node;
+            while (true) {
+                if (Accept("<"))
+                    e = Expression.LessThan(e, AddSub());
+                else if (Accept(">"))
+                    e = Expression.GreaterThan(e, AddSub());
+                else if (Accept("<="))
+                    e = Expression.LessThanOrEqual(e, AddSub());
+                else if (Accept(">="))
+                    e = Expression.GreaterThanOrEqual(e, AddSub());
+                break;
+            }
+
+            return e;
         }
 
-        private INode AddSub() {
-            INode node = MulDiv();
+        private Expression AddSub() {
+            Expression e = MulDiv();
 
-            return node;
+            while (true) {
+                if (Accept("+"))
+                    e = Expression.Add(e, Expression.Convert(MulDiv(), e.Type));
+                else if (Accept("-"))
+                    e = Expression.Subtract(e, Expression.Convert(MulDiv(), e.Type));
+                break;
+            }
+
+            return e;
         }
 
-        private INode MulDiv() {
-            INode node = Power();
+        private Expression MulDiv() {
+            Expression e = Power();
 
-            return node;
+            while (true) {
+                if (Accept("*"))
+                    e = Expression.Multiply(e, Expression.Convert(Power(), e.Type));
+                else if (Accept("/"))
+                    e = Expression.Divide(e, Expression.Convert(Power(), e.Type));
+                break;
+            }
+
+            return e;
         }
 
-        private INode Power() {
-            INode node = Preffix();
+        private Expression Power() {
+            Expression e = Preffix();
 
-            return node;
+            while (true) {
+                if (Accept("**"))
+                    e = Expression.Power(e, Expression.Convert(Preffix(), e.Type));
+                break;
+            }
+
+            return e;
         }
 
-        private INode Preffix() {
-            INode node = null;
+        private Expression Preffix() {
+            Expression e = null;
 
-            node = Suffix();
+            if (Accept("+"))
+                e = Expression.UnaryPlus(Suffix());
+            else if (Accept("-"))
+                e = Expression.Negate(Suffix());
+            else if (Accept("!"))
+                e = Expression.Not(Suffix());
+            else if (Accept("++"))
+                e = Expression.PreIncrementAssign(Suffix());
+            else if (Accept("--"))
+                e = Expression.PreDecrementAssign(Suffix());
+            else
+                e = Suffix();
 
-            return node;
+            return e;
         }
 
-        private INode Suffix() {
-            INode node = Term();
+        private Expression Suffix() {
+            Expression e = Term();
 
-            return node;
+            if (Accept("++"))
+                e = Expression.PostDecrementAssign(e);
+            else if (Accept("--"))
+                e = Expression.PostIncrementAssign(e);
+
+            return e;
         }
 
-        private INode Term() {
-            INode node = null;
+        private Expression Term() {
+            Expression e = null;
 
-            GetToken();
-            node = new EmptyNode();
+            if (Check(Token.ID.Identifier)) {
+                string name = token.Current.Text;
+                GetToken();
 
-            return node;
+                e = Expression.Parameter(typeof(object), name);
+
+                if (Accept("="))
+                    e = Expression.Assign(e, Expression.Convert(Expr(), typeof(object)));
+            } else if (Check(Token.ID.Integer)) {
+                e = Expression.Constant(int.Parse(token.Current.Text));
+                GetToken();
+            } else if (Check(Token.ID.Float)) {
+                e = Expression.Constant(double.Parse(token.Current.Text));
+                GetToken();
+            } else if (Check(Token.ID.String)) {
+                e = Expression.Constant(token.Current.Text);
+                GetToken();
+            } else if (Check(Token.ID.Character)) {
+                e = Expression.Constant(token.Current.Text[0]);
+                GetToken();
+            } else if (Accept("true"))
+                e = Expression.Constant(true);
+            else if (Accept("false"))
+                e = Expression.Constant(false);
+            else if (Accept("null"))
+                e = Expression.Constant(null);
+            else if (Accept("(")) {
+                e = Expr();
+
+                if (!Accept(")"))
+                    Error("unmatched parentheses");
+            } else if (Accept("{")) {
+                List<Expression> nodes = ParseBlock();
+                e = nodes.Count == 0 ? Expression.Empty() : (Expression)Expression.Block(nodes);
+            } else if (Accept(";"))
+                e = Expression.Empty();
+            else if (Check(Token.ID.End))
+                Error("unexpected end of program");
+            else if (Check(Token.ID.Unknown))
+                Error("unknown token '" + token.Current.Text + "'");
+            else
+                Error("unexpected token '" + token.Current.Text + "'");
+
+            return e;
         }
 
         private void Error(string message, int delta = 0) {
@@ -128,8 +241,8 @@ namespace SharpScript {
             token.MoveNext();
         }
 
-        private List<INode> ParseBlock() {
-            List<INode> nodes = new List<INode>();
+        private List<Expression> ParseBlock() {
+            List<Expression> nodes = new List<Expression>();
 
             while (!Check("}") && !Check(Token.ID.End))
                 nodes.Add(Oper());
@@ -140,8 +253,8 @@ namespace SharpScript {
             return nodes;
         }
 
-        private List<INode> ParseList() {
-            List<INode> nodes = new List<INode>();
+        private List<Expression> ParseList() {
+            List<Expression> nodes = new List<Expression>();
 
             do
                 nodes.Add(LogicOr());

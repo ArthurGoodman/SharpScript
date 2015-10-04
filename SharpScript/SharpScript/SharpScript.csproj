@@ -41,12 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Context.cs" />
-    <Compile Include="EmptyNode.cs" />
+    <Compile Include="Class.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="LexicalErrorException.cs" />
-    <Compile Include="INode.cs" />
-    <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Engine.cs" />
