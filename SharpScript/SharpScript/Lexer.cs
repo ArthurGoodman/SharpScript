@@ -123,14 +123,14 @@ namespace SharpScript {
             } else {
                 int i = 0;
 
-                while(i != operators.Length)
-                    for(i = 0; i != operators.Length; i++)
-                        if(operators[i].SubstringWrapper(0, token.Text.Length + 1) == token.Text + At(pos)) {
+                while (i != operators.Length)
+                    for (i = 0; i != operators.Length; i++)
+                        if (operators[i].SubstringWrapper(0, token.Text.Length + 1) == token.Text + At(pos)) {
                             token.Text += At(pos++);
                             break;
                         }
 
-                if(token.Text != "" && (i = Array.IndexOf(operators, token.Text)) != -1)
+                if (token.Text != "" && (i = Array.IndexOf(operators, token.Text)) != -1)
                     token.Id = Token.ID.Keyword;
                 else {
                     if (token.Text == "")

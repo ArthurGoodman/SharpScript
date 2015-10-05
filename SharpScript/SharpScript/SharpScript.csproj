@@ -41,7 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="LexicalErrorException.cs" />
     <Compile Include="Parser.cs" />
