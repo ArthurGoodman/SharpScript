@@ -19,10 +19,10 @@ namespace SharpScript {
             while (!Check(Token.ID.End))
                 nodes.Add(Oper());
 
-            Expression e = nodes.Count == 0 ? Expression.Empty() : (Expression)Expression.Block(nodes);
+            Expression e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(nodes);
             //e.Position = p;
 
-            return e;
+            return Expression.Convert(e, typeof(object));
         }
 
         private Expression Oper() {
@@ -203,9 +203,9 @@ namespace SharpScript {
                     Error("unmatched parentheses");
             } else if (Accept("{")) {
                 List<Expression> nodes = ParseBlock();
-                e = nodes.Count == 0 ? Expression.Empty() : (Expression)Expression.Block(nodes);
+                e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(nodes);
             } else if (Accept(";"))
-                e = Expression.Empty();
+                e = Expression.Constant(null);
             else if (Check(Token.ID.End))
                 Error("unexpected end of program");
             else if (Check(Token.ID.Unknown))

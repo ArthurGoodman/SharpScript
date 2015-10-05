@@ -38,7 +38,11 @@ namespace SharpScript {
             sources.Push(new Source(source));
 
             try {
-                Console.WriteLine(Expression.Lambda(parser.Parse(lexer.Lex(source))).Compile().DynamicInvoke());
+                List<Token> tokens = lexer.Lex(source);
+                Expression tree = parser.Parse(tokens);
+                Expression<Func<object>> expr = Expression.Lambda<Func<object>>(tree);
+                Func<object> func = expr.Compile();
+                Console.WriteLine(func() ?? "null");
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
                 if (e.Position.Valid)
