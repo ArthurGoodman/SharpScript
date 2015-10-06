@@ -6,21 +6,25 @@ namespace SharpScript {
         private List<Token> tokens;
         private List<Token>.Enumerator token;
 
+        private Dictionary<string, Stack<ParameterExpression>> variables = new Dictionary<string, Stack<ParameterExpression>>();
+        private Stack<HashSet<ParameterExpression>> scopes = new Stack<HashSet<ParameterExpression>>();
+
         public Expression Parse(List<Token> tokens) {
             this.tokens = tokens;
             token = tokens.GetEnumerator();
 
             GetToken();
 
-            //Position p = token.Current.Position;
+            scopes.Push(new HashSet<ParameterExpression>());
 
             List<Expression> nodes = new List<Expression>();
 
             while (!Check(Token.ID.End))
                 nodes.Add(Oper());
 
-            Expression e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(nodes);
-            //e.Position = p;
+            Expression e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(scopes.Peek(), nodes);
+
+            scopes.Pop();
 
             return Expression.Convert(e, typeof(object));
         }
@@ -174,10 +178,18 @@ namespace SharpScript {
                 string name = token.Current.Text;
                 GetToken();
 
-                e = Expression.Parameter(typeof(object), name);
+                e = variables.ContainsKey(name) ? variables[name].Peek() : Expression.Parameter(typeof(object), name);
 
-                if (Accept("="))
+                if (Accept("=")) {
+                    if (!variables.ContainsKey(name)) {
+                        variables.Add(name, new Stack<ParameterExpression>());
+                        variables[name].Push((ParameterExpression)e);
+
+                        scopes.Peek().Add((ParameterExpression)e);
+                    }
+
                     e = Expression.Assign(e, Expression.Convert(Expr(), typeof(object)));
+                }
             } else if (Check(Token.ID.Integer)) {
                 e = Expression.Constant(int.Parse(token.Current.Text));
                 GetToken();
@@ -202,8 +214,19 @@ namespace SharpScript {
                 if (!Accept(")"))
                     Error("unmatched parentheses");
             } else if (Accept("{")) {
+                scopes.Push(new HashSet<ParameterExpression>());
+
                 List<Expression> nodes = ParseBlock();
-                e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(nodes);
+                e = nodes.Count == 0 ? Expression.Constant(null) : (Expression)Expression.Block(scopes.Peek(), nodes);
+
+                foreach (ParameterExpression pe in scopes.Peek()) {
+                    variables[pe.Name].Pop();
+
+                    if (variables[pe.Name].Count == 0)
+                        variables.Remove(pe.Name);
+                }
+
+                scopes.Pop();
             } else if (Accept(";"))
                 e = Expression.Constant(null);
             else if (Check(Token.ID.End))
