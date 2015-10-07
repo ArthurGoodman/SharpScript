@@ -42,7 +42,7 @@ namespace SharpScript {
                 Expression tree = parser.Parse(tokens);
                 Expression<Func<object>> expr = Expression.Lambda<Func<object>>(tree);
                 Func<object> func = expr.Compile();
-                Console.WriteLine(func() ?? "null");
+                Console.WriteLine("\n=> " + (func() ?? "null"));
             } catch (ErrorException e) {
                 Console.WriteLine(FileName + ":" + (e.Position.Valid ? e.Position + ": " : " ") + e.Message);
                 if (e.Position.Valid)

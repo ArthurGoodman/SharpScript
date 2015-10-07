@@ -15,7 +15,9 @@ namespace SharpScript {
             "do",
             "true",
             "false",
-            "null"
+            "null",
+            "break",
+            "continue"
         };
 
         private string[] operators = new[] {
@@ -23,6 +25,7 @@ namespace SharpScript {
             "-",
             "*",
             "/",
+            "%",
             "**",
             "&&",
             "||",
@@ -120,6 +123,18 @@ namespace SharpScript {
                     token.Id = Token.ID.Keyword;
                 else
                     token.Id = Token.ID.Identifier;
+            } else if (At(pos) == '"') {
+                pos++;
+
+                while (At(pos) != '\0' && At(pos) != '"')
+                    token.Text += At(pos++);
+
+                if (At(pos) != '"')
+                    Error("invalid string literal");
+
+                pos++;
+
+                token.Id = Token.ID.String;
             } else {
                 int i = 0;
 

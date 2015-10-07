@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace SharpScript {
@@ -8,6 +9,9 @@ namespace SharpScript {
 
         private Dictionary<string, Stack<ParameterExpression>> variables = new Dictionary<string, Stack<ParameterExpression>>();
         private Stack<HashSet<ParameterExpression>> scopes = new Stack<HashSet<ParameterExpression>>();
+
+        private Stack<LabelTarget> breakLabels = new Stack<LabelTarget>();
+        private Stack<LabelTarget> continueLabels = new Stack<LabelTarget>();
 
         public Expression Parse(List<Token> tokens) {
             this.tokens = tokens;
@@ -26,7 +30,7 @@ namespace SharpScript {
 
             scopes.Pop();
 
-            return Expression.Convert(e, typeof(object));
+            return e.Type == typeof(void) ? (Expression)Expression.Block(e, (Expression)Expression.Constant(null)) : Expression.Convert(e, typeof(object));
         }
 
         private Expression Oper() {
@@ -47,9 +51,11 @@ namespace SharpScript {
             Expression e = LogicAnd();
 
             while (true) {
-                if (Accept("||"))
-                    e = Expression.Or(e, LogicAnd());
-                else
+                if (Accept("||")) {
+                    Expression right = LogicAnd();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Or(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
                     break;
             }
 
@@ -60,9 +66,11 @@ namespace SharpScript {
             Expression e = Equality();
 
             while (true) {
-                if (Accept("&&"))
-                    e = Expression.And(e, Equality());
-                else
+                if (Accept("&&")) {
+                    Expression right = Equality();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.And(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
                     break;
             }
 
@@ -73,11 +81,16 @@ namespace SharpScript {
             Expression e = Relation();
 
             while (true) {
-                if (Accept("=="))
-                    e = Expression.Equal(e, Relation());
-                else if (Accept("!="))
-                    e = Expression.NotEqual(e, Relation());
-                break;
+                if (Accept("==")) {
+                    Expression right = Relation();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Equal(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept("!=")) {
+                    Expression right = Relation();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.NotEqual(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
+                    break;
             }
 
             return e;
@@ -87,15 +100,24 @@ namespace SharpScript {
             Expression e = AddSub();
 
             while (true) {
-                if (Accept("<"))
-                    e = Expression.LessThan(e, AddSub());
-                else if (Accept(">"))
-                    e = Expression.GreaterThan(e, AddSub());
-                else if (Accept("<="))
-                    e = Expression.LessThanOrEqual(e, AddSub());
-                else if (Accept(">="))
-                    e = Expression.GreaterThanOrEqual(e, AddSub());
-                break;
+                if (Accept("<")) {
+                    Expression right = AddSub();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.LessThan(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept(">")) {
+                    Expression right = AddSub();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.GreaterThan(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept("<=")) {
+                    Expression right = AddSub();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.LessThanOrEqual(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept(">=")) {
+                    Expression right = AddSub();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.GreaterThanOrEqual(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
+                    break;
             }
 
             return e;
@@ -105,11 +127,16 @@ namespace SharpScript {
             Expression e = MulDiv();
 
             while (true) {
-                if (Accept("+"))
-                    e = Expression.Add(e, Expression.Convert(MulDiv(), e.Type));
-                else if (Accept("-"))
-                    e = Expression.Subtract(e, Expression.Convert(MulDiv(), e.Type));
-                break;
+                if (Accept("+")) {
+                    Expression right = MulDiv();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Add(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept("-")) {
+                    Expression right = MulDiv();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Subtract(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
+                    break;
             }
 
             return e;
@@ -119,11 +146,20 @@ namespace SharpScript {
             Expression e = Power();
 
             while (true) {
-                if (Accept("*"))
-                    e = Expression.Multiply(e, Expression.Convert(Power(), e.Type));
-                else if (Accept("/"))
-                    e = Expression.Divide(e, Expression.Convert(Power(), e.Type));
-                break;
+                if (Accept("*")) {
+                    Expression right = Power();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Multiply(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept("/")) {
+                    Expression right = Power();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Divide(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else if (Accept("%")) {
+                    Expression right = Power();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Modulo(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
+                    break;
             }
 
             return e;
@@ -133,9 +169,12 @@ namespace SharpScript {
             Expression e = Preffix();
 
             while (true) {
-                if (Accept("**"))
-                    e = Expression.Power(e, Expression.Convert(Preffix(), e.Type));
-                break;
+                if (Accept("**")) {
+                    Expression right = Preffix();
+                    Type type = Coerce(e.Type, right.Type);
+                    e = Expression.Power(Expression.Convert(e, type), Expression.Convert(right, type));
+                } else
+                    break;
             }
 
             return e;
@@ -164,9 +203,9 @@ namespace SharpScript {
             Expression e = Term();
 
             if (Accept("++"))
-                e = Expression.PostDecrementAssign(e);
-            else if (Accept("--"))
                 e = Expression.PostIncrementAssign(e);
+            else if (Accept("--"))
+                e = Expression.PostDecrementAssign(e);
 
             return e;
         }
@@ -174,13 +213,19 @@ namespace SharpScript {
         private Expression Term() {
             Expression e = null;
 
-            if (Check(Token.ID.Identifier)) {
+            if (Accept("print"))
+                e = Expression.Call(typeof(Console).GetMethod("WriteLine", new[] { typeof(object) }), Expression.Convert(Expr(), typeof(object)));
+            else if (Check(Token.ID.Identifier)) {
                 string name = token.Current.Text;
                 GetToken();
 
-                e = variables.ContainsKey(name) ? variables[name].Peek() : Expression.Parameter(typeof(object), name);
+                e = variables.ContainsKey(name) ? variables[name].Peek() : null;
 
                 if (Accept("=")) {
+                    Expression value = Expr();
+
+                    e = Expression.Parameter(value.Type, name);
+
                     if (!variables.ContainsKey(name)) {
                         variables.Add(name, new Stack<ParameterExpression>());
                         variables[name].Push((ParameterExpression)e);
@@ -188,7 +233,7 @@ namespace SharpScript {
                         scopes.Peek().Add((ParameterExpression)e);
                     }
 
-                    e = Expression.Assign(e, Expression.Convert(Expr(), typeof(object)));
+                    e = Expression.Assign(e, value);
                 }
             } else if (Check(Token.ID.Integer)) {
                 e = Expression.Constant(int.Parse(token.Current.Text));
@@ -229,6 +274,29 @@ namespace SharpScript {
                 scopes.Pop();
             } else if (Accept(";"))
                 e = Expression.Constant(null);
+            else if (Accept("if")) {
+                Expression condition = Oper();
+                Expression body = Expr();
+
+                if (Accept("else"))
+                    e = Expression.IfThenElse(condition, body, Expr());
+                else
+                    e = Expression.IfThen(condition, body);
+            } else if (Accept("while")) {
+                breakLabels.Push(Expression.Label());
+                continueLabels.Push(Expression.Label());
+
+                Expression condition = Oper();
+                Expression body = Expr();
+
+                e = Expression.Loop(Expression.IfThenElse(condition, body, Expression.Break(breakLabels.Peek())), breakLabels.Peek(), continueLabels.Peek());
+
+                breakLabels.Pop();
+                continueLabels.Pop();
+            } else if (Accept("break"))
+                e = Expression.Break(breakLabels.Peek());
+            else if (Accept("continue"))
+                e = Expression.Continue(continueLabels.Peek());
             else if (Check(Token.ID.End))
                 Error("unexpected end of program");
             else if (Check(Token.ID.Unknown))
@@ -284,6 +352,11 @@ namespace SharpScript {
             while (Accept(","));
 
             return nodes;
+        }
+
+        private Type Coerce(Type a, Type b) {
+            Type[] types = new Type[] { typeof(char), typeof(int), typeof(double) };
+            return types[Math.Max(Array.IndexOf(types, a), Array.IndexOf(types, b))];
         }
     }
 }
