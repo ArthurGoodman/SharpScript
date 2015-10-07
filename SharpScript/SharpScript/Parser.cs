@@ -171,7 +171,7 @@ namespace SharpScript {
             while (true) {
                 if (Accept("**")) {
                     Expression right = Preffix();
-                    Type type = Coerce(e.Type, right.Type);
+                    Type type = typeof(double);
                     e = Expression.Power(Expression.Convert(e, type), Expression.Convert(right, type));
                 } else
                     break;
