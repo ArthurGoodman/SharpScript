@@ -275,7 +275,7 @@ namespace SharpScript {
             } else if (Accept(";"))
                 e = Expression.Constant(null);
             else if (Accept("if")) {
-                Expression condition = Oper();
+                Expression condition = Expr();
                 Expression body = Expr();
 
                 if (Accept("else"))
@@ -286,7 +286,7 @@ namespace SharpScript {
                 breakLabels.Push(Expression.Label());
                 continueLabels.Push(Expression.Label());
 
-                Expression condition = Oper();
+                Expression condition = Expr();
                 Expression body = Expr();
 
                 e = Expression.Loop(Expression.IfThenElse(condition, body, Expression.Break(breakLabels.Peek())), breakLabels.Peek(), continueLabels.Peek());
